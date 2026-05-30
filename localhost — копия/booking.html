@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование столика | Кафе «Наше кафе»</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fefaf5 0%, #f5ebe0 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-wrapper {
+            max-width: 650px;
+            margin: 0 auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Хлебные крошки */
+        .breadcrumb {
+            margin-bottom: 20px;
+        }
+
+        .breadcrumb a {
+            color: #b45f2b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Карточка бронирования */
+        .booking-card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Шапка карточки */
+        .booking-header {
+            background: linear-gradient(135deg, #b45f2b, #c97e3a);
+            padding: 35px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .booking-header::before {
+            content: '☕';
+            position: absolute;
+            bottom: -20px;
+            left: 20px;
+            font-size: 60px;
+            opacity: 0.2;
+            transform: rotate(-15deg);
+        }
+
+        .booking-header::after {
+            content: '🍰';
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            font-size: 50px;
+            opacity: 0.2;
+            transform: rotate(10deg);
+        }
+
+        .booking-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-family: 'Georgia', serif;
+            letter-spacing: -0.5px;
+        }
+
+        .booking-header p {
+            opacity: 0.92;
+            font-size: 0.95rem;
+        }
+
+        /* Форма */
+        .booking-form {
+            padding: 35px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a3520;
+            font-size: 0.9rem;
+        }
+
+        .required::after {
+            content: '*';
+            color: #c97e3a;
+            margin-left: 4px;
+            font-size: 1rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #efe3d6;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #c97e3a;
+            box-shadow: 0 0 0 4px rgba(201, 126, 58, 0.1);
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: #d4a373;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Стили для радио-группы (выбор места) */
+        .radio-group {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fefaf5;
+            padding: 10px 18px;
+            border-radius: 40px;
+            border: 2px solid #efe3d6;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            background: #fff2e6;
+            border-color: #c97e3a;
+            box-shadow: 0 2px 8px rgba(201, 126, 58, 0.2);
+        }
+
+        .radio-option input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            accent-color: #c97e3a;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            margin: 0;
+            font-weight: 500;
+            color: #4a3520;
+            cursor: pointer;
+        }
+
+        .radio-option:hover {
+            border-color: #d4a373;
+            background: #fff6ed;
+        }
+
+        /* Чекбокс согласия */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #c97e3a;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .checkbox-group a {
+            color: #c97e3a;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        /* Кнопка отправки */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #c97e3a, #b45f2b);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(201, 126, 58, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Уведомления */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 5px solid #17a2b8;
+        }
+
+        .close-alert {
+            margin-left: auto;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        .close-alert:hover {
+            opacity: 1;
+        }
+
+        /* Инфо-текст */
+        .info-text {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        /* Дополнительная информация */
+        .booking-info {
+            background: #fef8f0;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #b45f2b;
+        }
+
+        .info-item span:first-child {
+            font-size: 1.2rem;
+        }
+
+        /* Ссылка назад */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 25px;
+            color: #b45f2b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: gap 0.3s ease;
+        }
+
+        .back-link:hover {
+            gap: 12px;
+            text-decoration: underline;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 550px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .booking-header {
+                padding: 25px 20px;
+            }
+
+            .booking-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .booking-form {
+                padding: 25px 20px;
+            }
+
+            .booking-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="booking-wrapper">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumb">
+            <a href="index.html"> Главная</a> / <span> Бронирование столика</span>
+        </div>
+
+        <!-- Основная карточка -->
+        <div class="booking-card">
+            <div class="booking-header">
+                <h1>Забронировать столик</h1>
+                <p>Заполните форму, и мы с вами свяжемся для подтверждения</p>
+            </div>
+
+            <div class="booking-form">
+                <!-- Уведомления будут появляться здесь -->
+                <div id="notificationArea"></div>
+
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label class="required">Ваше имя</label>
+                        <input type="text" id="name" name="name" required 
+                               placeholder="Как к вам обращаться?">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="required">Телефон</label>
+                            <input type="tel" id="phone" name="phone" required 
+                               placeholder="+7 (___) ___-__-__">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email (необязательно)</label>
+                            <input type="email" id="email" name="email" 
+                                   placeholder="example@mail.ru">
+                            <div class="info-text">На него придёт подтверждение</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="required">Дата</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required">Время</label>
+                            <select id="time" name="time" required>
+                                <option value="">Выберите время</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="required">Количество гостей</label>
+                        <select id="guests" name="guests" required>
+                            <option value="1">1 гость</option>
+                            <option value="2" selected>2 гостя</option>
+                            <option value="3">3 гостя</option>
+                            <option value="4">4 гостя</option>
+                            <option value="5">5 гостей</option>
+                            <option value="6">6 гостей</option>
+                            <option value="7">7 гостей</option>
+                            <option value="8">8 гостей</option>
+                            <option value="9">9 гостей</option>
+                            <option value="10">10 гостей</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Где разместить?</label>
+                        <div class="radio-group" id="placeGroup">
+                            <div class="radio-option" data-value="inside">
+                                <input type="radio" name="place" id="placeInside" value="Внутри кафе" checked>
+                                <label for="placeInside"> Внутри кафе</label>
+                            </div>
+                            <div class="radio-option" data-value="terrace">
+                                <input type="radio" name="place" id="placeTerrace" value="На веранде">
+                                <label for="placeTerrace"> На веранде</label>
+                            </div>
+                        </div>
+                        <div class="info-text">Мы постараемся учесть ваше пожелание, но места зависят от погоды и наличия свободных столиков</div>
+                    </div>
+                    <!-- Конец нового блока -->
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="agree" required>
+                        <label for="agree">
+                            Я согласен(на) с <a href="#">правилами бронирования</a> и даю согласие на обработку персональных данных
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span></span> Забронировать столик
+                    </button>
+                </form>
+
+                <!-- Блок с полезной информацией -->
+                <div class="booking-info">
+                    <div class="info-item">
+                        <span></span>
+                        <span>Бронирование по телефону: +7 (347) 123-45-67</span>
+                    </div>
+                    <div class="info-item">
+                        <span></span>
+                        <span>Время работы: 09:00 – 23:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span></span>
+                        <span>г. Стерлитамак, ул. Ленина, д. 8</span>
+                    </div>
+                </div>
+
+                <a href="index.html" class="back-link">
+                    <span>←</span> Вернуться на главную
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 1. Установка минимальной даты (сегодня) и значение по умолчанию (завтра)
+        const dateInput = document.getElementById('date');
+        if (dateInput) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            dateInput.min = `${yyyy}-${mm}-${dd}`;
+            
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const tomorrowYyyy = tomorrow.getFullYear();
+            const tomorrowMm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const tomorrowDd = String(tomorrow.getDate()).padStart(2, '0');
+            dateInput.value = `${tomorrowYyyy}-${tomorrowMm}-${tomorrowDd}`;
+        }
+
+        // === 2. Функция уведомлений
+        function showNotification(message, type) {
+            const notificationArea = document.getElementById('notificationArea');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            
+            let icon = '';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'info') icon = 'ℹ️';
+            
+            alertDiv.innerHTML = `
+                <span>${icon}</span>
+                <span style="flex:1;">${message}</span>
+                <span class="close-alert" onclick="this.parentElement.remove()">✕</span>
+            `;
+            
+            notificationArea.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentElement) {
+                    alertDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (alertDiv && alertDiv.parentElement) alertDiv.remove();
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // === 3. Работа с localStorage (имитация БД)
+        function saveBookingToLocal(booking) {
+            let bookings = JSON.parse(localStorage.getItem('cafe_bookings') || '[]');
+            booking.id = Date.now();
+            booking.createdAt = new Date().toISOString();
+            booking.status = 'new';
+            bookings.push(booking);
+            localStorage.setItem('cafe_bookings', JSON.stringify(bookings));
+        }
+
+        // Простейшая проверка доступности (по дате и времени)
+        function isTimeSlotAvailable(date, time) {
+            let bookings = JSON.parse(localStorage.getItem('cafe_bookings') || '[]');
+            const existing = bookings.find(b => b.date === date && b.time === time);
+            return !existing;
+        }
+
+        // === 4. Визуальные улучшения для radio-панели (подсветка выбранного)
+        function initRadioStyling() {
+            const radioOptions = document.querySelectorAll('.radio-option');
+            const radioInputs = document.querySelectorAll('input[name="place"]');
+            
+            function updateSelection() {
+                const selectedValue = document.querySelector('input[name="place"]:checked')?.value;
+                radioOptions.forEach(opt => {
+                    const input = opt.querySelector('input');
+                    if (input.checked) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            }
+            
+            radioInputs.forEach(radio => {
+                radio.addEventListener('change', updateSelection);
+            });
+            updateSelection();
+            
+            // Клик по всей области radio-option тоже переключает
+            radioOptions.forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    const radio = opt.querySelector('input');
+                    if (radio && !radio.checked) {
+                        radio.checked = true;
+                        updateSelection();
+                        // Вручную вызываем событие change, если нужно
+                        const changeEvent = new Event('change', { bubbles: true });
+                        radio.dispatchEvent(changeEvent);
+                    }
+                });
+            });
+        }
+        
+        // === 5. Валидация телефона и форматирование
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.slice(0, 11);
+                
+                let formatted = '';
+                if (value.length > 0) {
+                    if (value[0] === '7' || value[0] === '8') {
+                        formatted = '+7 ';
+                        let rest = value.slice(1);
+                        if (rest.length > 0) formatted += '(' + rest.slice(0, 3);
+                        if (rest.length > 3) formatted += ') ' + rest.slice(3, 6);
+                        if (rest.length > 6) formatted += '-' + rest.slice(6, 8);
+                        if (rest.length > 8) formatted += '-' + rest.slice(8, 10);
+                    } else {
+                        formatted = value;
+                    }
+                }
+                this.value = formatted;
+            });
+        }
+
+        // === 6. Обработка отправки формы (заменён комментарий на выбор места)
+        const form = document.getElementById('bookingForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Получаем значения полей
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const guests = document.getElementById('guests').value;
+            const agree = document.getElementById('agree').checked;
+            
+            // Получаем выбранное место (внутри кафе / на веранде)
+            let selectedPlace = '';
+            const placeRadios = document.querySelectorAll('input[name="place"]');
+            for (let radio of placeRadios) {
+                if (radio.checked) {
+                    selectedPlace = radio.value;
+                    break;
+                }
+            }
+            if (!selectedPlace) {
+                selectedPlace = 'Внутри кафе'; // fallback
+            }
+            
+            // Валидация
+            const errors = [];
+            if (name.length < 2) {
+                errors.push('Пожалуйста, укажите ваше имя (минимум 2 символа)');
+            }
+            const phoneClean = phone.replace(/\D/g, '');
+            if (phoneClean.length < 10) {
+                errors.push('Введите корректный номер телефона (не менее 10 цифр)');
+            }
+            if (!date) errors.push('Выберите дату');
+            if (!time) errors.push('Выберите время');
+            if (!agree) errors.push('Необходимо согласие с правилами бронирования');
+            
+            // Проверка доступности слота
+            if (date && time && !isTimeSlotAvailable(date, time)) {
+                errors.push('Извините, выбранное время уже занято. Пожалуйста, выберите другое время.');
+            }
+            
+            if (errors.length > 0) {
+                showNotification(errors.join('<br>'), 'error');
+                return;
+            }
+            
+            // Формируем объект бронирования. Вместо поля "comment" добавляем "placePreference"
+            const booking = {
+                name: name,
+                phone: phone,
+                email: email,
+                date: date,
+                time: time,
+                guests: parseInt(guests),
+                placePreference: selectedPlace,      // новое поле: внутри кафе / на веранде
+                // old comment убран, так как заменили на выбор
+            };
+            
+            // Сохраняем бронь
+            saveBookingToLocal(booking);
+            
+            // Формируем красивое сообщение об успехе
+            const formattedDate = new Date(date).toLocaleDateString('ru-RU');
+            const placeText = (selectedPlace === 'Внутри кафе') ? 'внутри кафе' : 'на веранде';
+            showNotification(
+                `Спасибо, ${name}! Ваша заявка на ${formattedDate} в ${time} (${placeText}) принята. Мы свяжемся с вами для подтверждения.`,
+                'success'
+            );
+            
+            // Опционально: очистим только поле согласия, чтобы повторно не нажимать при желании новой брони, 
+            // но оставим имя/телефон для удобства (если захочет забронировать ещё раз).
+            document.getElementById('agree').checked = false;
+            // Не очищаем выбор места и другие поля — пользователь может изменить вручную для новой заявки.
+            // Однако сделаем сброс выделения чекбокса только, а остальное остаётся (удобно).
+            
+            // Дополнительно можно пролистать вверх к уведомлению
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Инициализация стилизации радио-кнопок после загрузки DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            initRadioStyling();
+            
+            // Небольшой фикс: если вдруг нет выбранного значения по умолчанию, установим через скрипт
+            const defaultInside = document.getElementById('placeInside');
+            if (defaultInside && !defaultInside.checked) {
+                defaultInside.checked = true;
+                initRadioStyling(); // обновить стили ещё раз
+            }
+        });
+    </script>
+</body>
+</html>
